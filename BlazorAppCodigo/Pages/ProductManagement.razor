@@ -1,0 +1,97 @@
+﻿@page "/products"
+@using System.Text.Json
+
+
+
+<div class="container mt-5">
+    <h3>Crear Producto</h3>
+    <EditForm Model="newProduct" OnValidSubmit="HandleValidSubmit" FormName="Product">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="name">Nombre</label>
+            <InputText id="name" class="form-control" @bind-Value="newProduct.name" />
+        </div>
+        <div class="form-group">
+            <label for="year">Año</label>
+            <InputNumber id="year" class="form-control" @bind-Value="newProduct.data.year" />
+        </div>
+        <div class="form-group">
+            <label for="price">Precio</label>
+            <InputNumber id="price" class="form-control" @bind-Value="newProduct.data.price" />
+        </div>
+        <div class="form-group">
+            <label for="cpu">Modelo de CPU</label>
+            <InputText id="cpu" class="form-control" @bind-Value="newProduct.data.CPU_model" />
+        </div>
+        <div class="form-group">
+            <label for="disk">Tamaño del Disco Duro</label>
+            <InputText id="disk" class="form-control" @bind-Value="newProduct.data.Hard_disk_size" />
+        </div>
+        <button type="submit" class="btn btn-primary" onclick="HandleValidSubmit">Crear Producto</button>
+    </EditForm>
+
+    <h3 class="mt-5">Lista de Productos</h3>
+    <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Año</th>
+                <th>Precio</th>
+                <th>Modelo de CPU</th>
+                <th>Tamaño del Disco Duro</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in products)
+            {
+                <tr>
+                    <td>@product.name</td>
+                    <td>@product.data?.year</td>
+                    <td>@product.data?.price</td>
+                    <td>@product.data?.CPU_model</td>
+                    <td>@product.data?.Hard_disk_size</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+
+    [SupplyParameterFromForm]
+    private Product newProduct { get; set; } = new Product();
+
+    private List<Product> products = new List<Product>();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        HttpClient httpClient = new HttpClient();
+        var response = await httpClient.GetAsync("https://api.restful-api.dev/objects");
+
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+      
+        HttpClient httpClient = new HttpClient();
+        var productJson = JsonSerializer.Serialize(newProduct);
+        var content = new StringContent(productJson, System.Text.Encoding.UTF8, "application/json");
+        
+        var response = await httpClient.PostAsync("https://api.restful-api.dev/objects", content);
+
+        //Pruebas
+        response.EnsureSuccessStatusCode();
+        var createdProduct = await response.Content.ReadFromJsonAsync<Product>(); 
+        products.Insert(0, createdProduct);
+        newProduct = new Product { data = new ProductData() };
+    }
+}
