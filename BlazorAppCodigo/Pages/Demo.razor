@@ -1,0 +1,41 @@
+﻿@page "/demo"
+
+
+<h3>Demo</h3>
+
+<PageTitle>Demo</PageTitle>
+
+<h1>Demo</h1>
+
+<button class="btn btn-primary" @onclick="Agregar">Agregar</button>
+
+<button class="btn btn-primary" @onclick="Limpiar">Limpiar</button>
+
+
+<input @bind="nombre" placeholder="Escribe tu nombre" />
+
+<p>Hola, @nombre</p>
+
+@foreach (var item in numeros)
+{
+    <p role="status">@item</p>
+}
+
+@code {
+    private List<int> numeros = new List<int>();
+    private string nombre = "";
+
+    private void Agregar()
+    {
+
+        int numero = numeros.Count();
+
+        numeros.Add(numero);
+
+    }
+    private void Limpiar()
+    {
+        nombre = "";
+    }
+
+}

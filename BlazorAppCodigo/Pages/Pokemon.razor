@@ -1,0 +1,59 @@
+﻿@page "/pokemon"
+<h3>Lista de Evoluciones de Pokémon</h3>
+
+<table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Forma</th>            
+            <th>Evoluciones</th> 
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pokemon in _listPokemon)
+        {
+            <tr>
+                <td>@pokemon.pokemon_id</td>
+                <td>@pokemon.pokemon_name</td>
+                <td>@pokemon.form</td>                
+                <td>
+                    <ul>
+                        @foreach (var evolution in pokemon.evolutions)
+                        {
+                            <li>@evolution.pokemon_name (Candy Required: @evolution.candy_required)</li>
+                        }
+                    </ul>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+@code {
+
+    private List<PokemonModel> _listPokemon = new List<PokemonModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetPokemonData();
+    }
+
+
+    private async Task GetPokemonData()
+    {
+
+        HttpClient httpClient = new HttpClient();
+        var response= await  httpClient.GetAsync("https://pogoapi.net/api/v1/pokemon_evolutions.json");
+
+        if (response.IsSuccessStatusCode)
+        {                        
+            _listPokemon = await response.Content.ReadFromJsonAsync<List<PokemonModel>>();            
+        }
+
+    } 
+
+}
